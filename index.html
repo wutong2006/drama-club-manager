@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="大学话剧社团管理平台 - 智能排期、成员管理、资源库存、剧本版权一体化解决方案">
+<meta name="keywords" content="话剧社团,排练管理,智能排期,剧本版权,社团管理">
+<meta name="author" content="满天星话剧团">
+<meta property="og:title" content="话剧社团管理平台">
+<meta property="og:description" content="解决排练冲突、积极性下降及版权问题的综合管理工具">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#667eea">
+<title>满天星话剧社团管理平台</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Microsoft YaHei','Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:16px;line-height:1.6;color:#333}
+.container{max-width:1100px;margin:0 auto;background:#fff;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
+header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:28px 20px;text-align:center}
+header h1{font-size:clamp(1.3rem,4vw,2rem);margin-bottom:16px;text-shadow:2px 2px 4px rgba(0,0,0,.15);letter-spacing:1px}
+nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tab-btn{padding:9px 16px;border:2px solid rgba(255,255,255,.7);background:transparent;color:#fff;border-radius:25px;cursor:pointer;font-size:14px;transition:all .25s;font-weight:600;white-space:nowrap}
+.tab-btn:hover{background:rgba(255,255,255,.2);border-color:#fff}
+.tab-btn.active{background:#fff;color:#667eea;border-color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+main{padding:20px;min-height:500px}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeUp .4s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#f8f9fc;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 3px 12px rgba(0,0,0,.06);border-left:4px solid #667eea;transition:box-shadow .25s}
+.card:hover{box-shadow:0 5px 20px rgba(0,0,0,.1)}
+.card h3{color:#667eea;margin-bottom:12px;font-size:1.15rem;display:flex;align-items:center;gap:6px}
+form{display:flex;flex-direction:column;gap:10px}
+input,select,textarea{padding:10px 12px;border:1.5px solid #dde;border-radius:8px;font-size:14px;transition:border .25s,box-shadow .25s;font-family:inherit;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.15)}
+textarea{resize:vertical;min-height:65px}
+.btn{padding:9px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.btn-primary{background:#667eea;color:#fff}
+.btn-primary:hover{background:#5568d3;transform:translateY(-1px);box-shadow:0 4px 14px rgba(102,126,234,.35)}
+.btn-success{background:#28a745;color:#fff}
+.btn-success:hover{background:#218838;transform:translateY(-1px);box-shadow:0 4px 14px rgba(40,167,69,.35)}
+.btn-danger{background:#dc3545;color:#fff;padding:6px 10px;font-size:12px}
+.btn-danger:hover{background:#c82333}
+.btn-outline{background:transparent;color:#667eea;border:1.5px solid #667eea;padding:6px 10px;font-size:12px}
+.btn-outline:hover{background:#667eea;color:#fff}
+.template-info{background:#fff9e6;border-left:4px solid #f0ad4e;padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px}
+.template-info code{background:#fce4a8;padding:1px 6px;border-radius:3px;font-size:13px}
+.template-info p{margin:4px 0;color:#856404}
+.result-box{background:#fff;border-radius:10px;padding:14px;margin-top:14px;border:2px solid #667eea;display:none}
+.result-box h4{color:#667eea;margin-bottom:10px;font-size:1rem}
+.result-item{background:#eef3ff;padding:10px 14px;border-radius:8px;margin:6px 0;border-left:4px solid #2196F3;font-size:14px}
+.list{display:grid;gap:10px}
+.list-item{background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;transition:all .25s}
+.list-item:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.item-info{flex:1;min-width:160px}
+.item-info h4{color:#5a6fc4;margin-bottom:4px;font-size:.95rem}
+.item-info p{color:#666;line-height:1.5;font-size:13px}
+.item-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:.3px}
+.st-avail{background:#d4edda;color:#155724}
+.st-borrowed{background:#f8d7da;color:#721c24}
+.st-pending{background:#fff3cd;color:#856404}
+.st-auth{background:#d1ecf1;color:#0c5460}
+.section-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.stat-card{background:linear-gradient(135deg,#667eea,#7c5cbf);color:#fff;padding:14px;border-radius:12px;text-align:center}
+.stat-card .stat-num{font-size:1.8rem;font-weight:700;line-height:1.2}
+.stat-card .stat-label{font-size:12px;opacity:.85;margin-top:2px}
+footer{background:#f8f9fc;padding:14px;text-align:center;color:#888;border-top:1px solid #e8e8e8;font-size:13px}
+footer a{color:#667eea;text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* 移动端适配 */
+@media(max-width:768px){
+body{padding:6px}
+header{padding:20px 14px}
+main{padding:12px}
+.card{padding:14px}
+.list-item{flex-direction:column;align-items:flex-start}
+.item-actions{width:100%;justify-content:flex-end}
+.section-stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+header h1{font-size:1.2rem}
+nav{gap:4px}
+.tab-btn{font-size:12px;padding:7px 12px}
+.card h3{font-size:1rem}
+.section-stats{grid-template-columns:1fr 1fr}
+.stat-card .stat-num{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<h1>🎭 满天星话剧社团管理平台</h1>
+<nav>
+<button class="tab-btn active" data-tab="schedule">📅 智能排期</button>
+<button class="tab-btn" data-tab="members">👥 成员管理</button>
+<button class="tab-btn" data-tab="resources">📦 资源库存</button>
+<button class="tab-btn" data-tab="scripts">📜 剧本版权</button>
+</nav>
+</header>
+
+<main>
+
+<!-- ========== 智能排期模块 ========== -->
+<section id="schedule" class="tab-content active">
+<div class="section-stats">
+<div class="stat-card"><div class="stat-num" id="statMembers">0</div><div class="stat-label">社团成员</div></div>
+<div class="stat-card"><div class="stat-num" id="statRehearsals">0</div><div class="stat-label">排练安排</div></div>
+<div class="stat-card"><div class="stat-num" id="statResources">0</div><div class="stat-label">资源总数</div></div>
+<div class="stat-card"><div class="stat-num" id="statScripts">0</div><div class="stat-label">剧本数</div></div>
+</div>
+
+<div class="card">
+<h3>🔍 最优排练时间推荐</h3>
+<p style="margin-bottom:10px;color:#666;font-size:13px">系统根据所有成员的课程表自动分析时间冲突，按参与人数降序推荐排练时段。</p>
+<button id="findOptimalTime" class="btn btn-primary">开始智能分析</button>
+<div id="optimalTimeResult" class="result-box"></div>
+</div>
+
+<div class="card">
+<h3>➕ 添加排练安排</h3>
+<form id="rehearsalForm">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<input type="text" id="rehearsalTitle" placeholder="排练标题（如：星喜联排第一场）" required>
+<input type="text" id="rehearsalLocation" placeholder="地点（如：活动中心301）">
+<input type="date" id="rehearsalDate" required>
+<input type="time" id="rehearsalTime" required>
+</div>
+<input type="text" id="rehearsalParticipants" placeholder="参与人员（逗号分隔，留空表示全员）">
+<textarea id="rehearsalNotes" placeholder="备注（如：请携带剧本和道具）" rows="2"></textarea>
+<button type="submit" class="btn btn-success">保存排练安排</button>
+</form>
+</div>
+
+<div class="card">
+<h3>📋 排练日程</h3>
+<div id="rehearsalList" class="list"><p style="color:#999">-- 暂无排练安排 --</p></div>
+</div>
+</section>
+
+<!-- ========== 成员管理模块 ========== -->
+<section id="members" class="tab-content">
+<div class="card">
+<h3>➕ 添加成员</h3>
+<div class="template-info">
+<strong>📝 数据录入格式（严格遵循模板）：</strong>
+<p><code>姓名，年级，饰演角色，上课时间</code></p>
+<p>示例：<code>张三，大二，主角，周一78节有课，周二56节有课</code></p>
+</div>
+<form id="memberForm">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<input type="text" id="memberName" placeholder="姓名" required>
+<select id="memberGrade" required>
+<option value="">选择年级</option>
+<option value="大一">大一</option><option value="大二">大二</option>
+<option value="大三">大三</option><option value="大四">大四</option>
+</select>
+<input type="text" id="memberRole" placeholder="饰演角色（如：主角、配角）">
+<input type="text" id="memberSkills" placeholder="技能标签（逗号分隔）">
+</div>
+<textarea id="memberSchedule" placeholder="上课时间（例：周一78节有课，周二56节有课，周三34节有课）" rows="2"></textarea>
+<button type="submit" class="btn btn-success">保存成员信息</button>
+</form>
+</div>
+
+<div class="card">
+<h3>📋 成员列表（共 <span id="memberCount">0</span> 人）</h3>
+<div id="memberList" class="list"><p style="color:#999">-- 暂无成员，请按照模板格式添加 --</p></div>
+</div>
+
+<div class="card">
+<h3>📢 一键发布通知</h3>
+<textarea id="notificationMessage" placeholder="输入排练通知内容，将通知全体成员..." rows="2"></textarea>
+<button id="sendNotification" class="btn btn-primary" style="margin-top:8px">发送通知</button>
+</div>
+</section>
+
+<!-- ========== 资源管理模块 ========== -->
+<section id="resources" class="tab-content">
+<div class="card">
+<h3>➕ 添加资源</h3>
+<form id="resourceForm">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<input type="text" id="resourceName" placeholder="资源名称" required>
+<select id="resourceType" required>
+<option value="">选择类型</option>
+<option value="道具">道具</option><option value="服装">服装</option><option value="场地">场地</option>
+</select>
+</div>
+<textarea id="resourceNotes" placeholder="备注说明" rows="2"></textarea>
+<button type="submit" class="btn btn-success">保存资源</button>
+</form>
+</div>
+
+<div class="card">
+<h3>📋 资源列表</h3>
+<div id="resourceList" class="list"><p style="color:#999">-- 暂无资源，请添加 --</p></div>
+</div>
+</section>
+
+<!-- ========== 剧本版权模块 ========== -->
+<section id="scripts" class="tab-content">
+<div class="card">
+<h3>➕ 添加剧本</h3>
+<form id="scriptForm">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<input type="text" id="scriptTitle" placeholder="剧本名称" required>
+<input type="text" id="scriptAuthor" placeholder="作者">
+<select id="scriptCopyrightStatus">
+<option value="未获取">未获取</option><option value="申请中">申请中</option>
+<option value="已授权">已授权</option><option value="已过期">已过期</option>
+</select>
+<input type="text" id="scriptContact" placeholder="版权联系人">
+<input type="text" id="scriptLicense" placeholder="授权类型">
+<input type="date" id="scriptExpiration">
+</div>
+<textarea id="scriptNotes" placeholder="备注" rows="2"></textarea>
+<button type="submit" class="btn btn-success">保存剧本</button>
+</form>
+</div>
+
+<div class="card">
+<h3>📋 剧本列表</h3>
+<div id="scriptList" class="list"><p style="color:#999">-- 暂无剧本，请添加 --</p></div>
+</div>
+</section>
+
+</main>
+
+<footer>
+<p>满天星话剧社团管理平台 &copy; 2026 &nbsp;|&nbsp; 部署于 <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a> &nbsp;|&nbsp; 数据存储在浏览器本地</p>
+</footer>
+</div>
+
+<script>
+/* ==================== localStorage 数据引擎 ==================== */
+var DB_KEY = 'drama_club_v2';
+
+function loadDB() {
+    try { var r = localStorage.getItem(DB_KEY); return r ? JSON.parse(r) : getDefaultDB(); }
+    catch(e) { return getDefaultDB(); }
+}
+function getDefaultDB() {
+    return { members:[], rehearsals:[], resources:[], scripts:[], nextId:1 };
+}
+function saveDB(db) { try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch(e) { alert('存储空间不足，请清理部分数据'); } }
+function nextId(db) { return db.nextId++; }
+function getAll(k) { var db = loadDB(); return db[k] || []; }
+
+// ==================== CRUD 操作 ====================
+function addOne(k, item) {
+    var db = loadDB();
+    item.id = nextId(db);
+    if (k === 'members') { item.attendance_rate = 0; }
+    if (k === 'resources') { item.status = '可用'; item.borrower = null; item.borrow_date = null; item.return_date = null; }
+    item.created_at = new Date().toISOString();
+    db[k].push(item);
+    saveDB(db);
+    return item.id;
+}
+function delOne(k, id) {
+    var db = loadDB();
+    db[k] = db[k].filter(function(x) { return x.id !== id; });
+    saveDB(db);
+}
+function updateResourceStatus(id, status, borrower, borrow_date, return_date) {
+    var db = loadDB();
+    var r = db.resources.find(function(x) { return x.id === id; });
+    if (r) { r.status = status; r.borrower = borrower || null; r.borrow_date = borrow_date || null; r.return_date = return_date || null; saveDB(db); }
+}
+function updateScriptStatus(id, status) {
+    var db = loadDB();
+    var s = db.scripts.find(function(x) { return x.id === id; });
+    if (s) { s.copyright_status = status; saveDB(db); }
+}
+
+// ==================== 智能排期算法 ====================
+var DAYS = ['周一','周二','周三','周四','周五','周六','周日'];
+var SLOTS = ['12','34','56','78','910'];
+var SLOT_NAMES = {
+    '12':'第1-2节 (8:00-9:35)','34':'第3-4节 (10:00-11:35)',
+    '56':'第5-6节 (14:00-15:35)','78':'第7-8节 (16:00-17:35)',
+    '910':'第9-10节 (19:00-20:35)'
+};
+
+function findOptimalTime() {
+    var members = getAll('members');
+    var cnt = {}, scheduled = 0;
+
+    DAYS.forEach(function(d) { cnt[d] = {}; SLOTS.forEach(function(s) { cnt[d][s] = 0; }); });
+
+    members.forEach(function(m) {
+        if (m.schedule && m.schedule.trim()) {
+            scheduled++;
+            DAYS.forEach(function(d) {
+                var re = new RegExp(d + '(\\d+)节有课');
+                var match = m.schedule.match(re);
+                if (match) {
+                    var busy = match[1];
+                    SLOTS.forEach(function(s) { if (busy.indexOf(s) === -1) cnt[d][s]++; });
+                } else {
+                    SLOTS.forEach(function(s) { cnt[d][s]++; });
+                }
+            });
+        } else {
+            DAYS.forEach(function(d) { SLOTS.forEach(function(s) { cnt[d][s]++; }); });
+        }
+    });
+
+    var result = [];
+    DAYS.forEach(function(d) {
+        SLOTS.forEach(function(s) {
+            result.push({ day:d, time:s, count:cnt[d][s], total:members.length });
+        });
+    });
+    result.sort(function(a,b) { return b.count - a.count; });
+    return { slots:result.slice(0,5), memberCount:members.length, membersWithSchedule:scheduled };
+}
+
+// ==================== 标签切换 ====================
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+        this.classList.add('active');
+        var id = this.getAttribute('data-tab');
+        document.getElementById(id).classList.add('active');
+        if (id === 'schedule') { refreshStats(); loadRehearsals(); }
+        if (id === 'members') { loadMembers(); }
+        if (id === 'resources') loadResources();
+        if (id === 'scripts') loadScripts();
+    });
+});
+
+// ==================== 统计面板 ====================
+function refreshStats() {
+    document.getElementById('statMembers').textContent = getAll('members').length;
+    document.getElementById('statRehearsals').textContent = getAll('rehearsals').length;
+    document.getElementById('statResources').textContent = getAll('resources').length;
+    document.getElementById('statScripts').textContent = getAll('scripts').length;
+}
+
+// ==================== Toast ====================
+function toast(msg) {
+    var el = document.getElementById('toast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'toast';
+        el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 22px;border-radius:22px;font-size:14px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap';
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.opacity = '1';
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() { el.style.opacity = '0'; }, 2000);
+}
+
+// ==================== 智能排期 ====================
+document.getElementById('findOptimalTime').addEventListener('click', function() {
+    var result = findOptimalTime();
+    var div = document.getElementById('optimalTimeResult');
+    div.style.display = 'block';
+    if (result.memberCount === 0) {
+        div.innerHTML = '<p style="padding:10px;color:#856404">⚠ 请先在「成员管理」中添加成员并填写课程安排</p>';
+        return;
+    }
+    var h = '<h4>📊 最优排练时间推荐（共 ' + result.memberCount + ' 名成员）</h4>';
+    h += '<p style="color:#888;margin-bottom:8px;font-size:12px">已填写课程：' + result.membersWithSchedule + ' 人 | 参与率 = 可用人数 ÷ 总人数</p>';
+    result.slots.forEach(function(s, i) {
+        var pct = s.total > 0 ? Math.round(s.count / s.total * 100) : 0;
+        var col = pct >= 80 ? '#28a745' : pct >= 50 ? '#e6a817' : '#dc3545';
+        h += '<div class="result-item"><strong>🏆 第' + (i+1) + '推荐：</strong>' + s.day + ' ' + (SLOT_NAMES[s.time] || s.time) + '<br><span style="color:' + col + ';font-weight:bold">可用 ' + s.count + ' 人（' + pct + '%）</span></div>';
+    });
+    if (result.membersWithSchedule === 0) h += '<p style="color:#856404;margin-top:8px;font-size:12px">💡 尚无成员填写课程，默认皆可用。请先填写成员课程以获得准确推荐。</p>';
+    div.innerHTML = h;
+});
+
+document.getElementById('rehearsalForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    addOne('rehearsals', {
+        title: document.getElementById('rehearsalTitle').value,
+        date: document.getElementById('rehearsalDate').value,
+        time: document.getElementById('rehearsalTime').value,
+        participants: document.getElementById('rehearsalParticipants').value,
+        location: document.getElementById('rehearsalLocation').value,
+        notes: document.getElementById('rehearsalNotes').value
+    });
+    this.reset();
+    loadRehearsals();
+    refreshStats();
+    toast('✅ 排练安排已保存');
+});
+
+function loadRehearsals() {
+    var list = getAll('rehearsals');
+    list.sort(function(a,b) { return a.date !== b.date ? a.date.localeCompare(b.date) : a.time.localeCompare(b.time); });
+    var div = document.getElementById('rehearsalList');
+    if (!list.length) { div.innerHTML = '<p style="color:#999">-- 暂无排练安排 --</p>'; return; }
+    div.innerHTML = list.map(function(r) {
+        return '<div class="list-item"><div class="item-info"><h4>🎬 ' + esc(r.title) + '</h4><p>📅 ' + r.date + ' ' + r.time + ' &nbsp;📍 ' + (r.location||'未指定') + '</p><p>👥 ' + (r.participants||'全员') + '</p>' + (r.notes ? '<p>📝 '+esc(r.notes)+'</p>' : '') + '</div><div class="item-actions"><button class="btn btn-danger" onclick="delRehearsal('+r.id+')">删除</button></div></div>';
+    }).join('');
+}
+function delRehearsal(id) { if (!confirm('确认删除？')) return; delOne('rehearsals',id); loadRehearsals(); refreshStats(); toast('已删除'); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ==================== 成员管理 ====================
+document.getElementById('memberForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    addOne('members', {
+        name: document.getElementById('memberName').value,
+        grade: document.getElementById('memberGrade').value,
+        role: document.getElementById('memberRole').value,
+        skills: document.getElementById('memberSkills').value,
+        schedule: document.getElementById('memberSchedule').value
+    });
+    this.reset();
+    loadMembers();
+    refreshStats();
+    toast('✅ 成员已添加');
+});
+
+function loadMembers() {
+    var list = getAll('members');
+    var div = document.getElementById('memberList');
+    document.getElementById('memberCount').textContent = list.length;
+    if (!list.length) { div.innerHTML = '<p style="color:#999">-- 暂无成员，请按照模板格式添加 --</p>'; return; }
+    div.innerHTML = list.map(function(m) {
+        return '<div class="list-item"><div class="item-info"><h4>👤 ' + esc(m.name) + ' <small style="color:#999">' + esc(m.grade) + '</small></h4><p>🎭 角色：' + (m.role||'未分配') + '</p><p>🏷 技能：' + (m.skills||'无') + '</p><p>📅 课程：' + (m.schedule||'<span style="color:#999">未填写</span>') + '</p></div><div class="item-actions"><button class="btn btn-danger" onclick="delMember('+m.id+')">删除</button></div></div>';
+    }).join('');
+}
+function delMember(id) { if (!confirm('确认删除该成员？')) return; delOne('members',id); loadMembers(); refreshStats(); toast('已删除'); }
+
+document.getElementById('sendNotification').addEventListener('click', function() {
+    var msg = document.getElementById('notificationMessage').value.trim();
+    if (!msg) { toast('⚠ 请输入通知内容'); return; }
+    document.getElementById('notificationMessage').value = '';
+    toast('📢 通知已发布！');
+});
+
+// ==================== 资源管理 ====================
+document.getElementById('resourceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    addOne('resources', {
+        name: document.getElementById('resourceName').value,
+        type: document.getElementById('resourceType').value,
+        notes: document.getElementById('resourceNotes').value
+    });
+    this.reset();
+    loadResources();
+    refreshStats();
+    toast('✅ 资源已保存');
+});
+
+function loadResources() {
+    var list = getAll('resources');
+    var div = document.getElementById('resourceList');
+    if (!list.length) { div.innerHTML = '<p style="color:#999">-- 暂无资源 --</p>'; return; }
+    div.innerHTML = list.map(function(r) {
+        return '<div class="list-item"><div class="item-info"><h4>📋 ' + esc(r.name) + ' <small style="color:#999">' + esc(r.type) + '</small></h4><p>状态：<span class="status-badge ' + (r.status==='可用'?'st-avail':'st-borrowed') + '">' + r.status + '</span></p>' + (r.borrower ? '<p>借用人：'+esc(r.borrower)+' &nbsp; 借出：'+(r.borrow_date||'')+' &nbsp; 预计归还：'+(r.return_date||'')+'</p>' : '') + (r.notes ? '<p>📝 '+esc(r.notes)+'</p>' : '') + '</div><div class="item-actions">' + (r.status==='可用' ? '<button class="btn btn-primary" style="font-size:12px;padding:5px 12px" onclick="borrowRes('+r.id+')">借出</button>' : '<button class="btn btn-outline" style="font-size:12px;padding:5px 12px" onclick="returnRes('+r.id+')">归还</button>') + '<button class="btn btn-danger" onclick="delResource('+r.id+')">删除</button></div></div>';
+    }).join('');
+}
+function borrowRes(id) {
+    var name = prompt('请输入借用人姓名：');
+    if (!name) return;
+    var today = new Date().toISOString().slice(0,10);
+    var ret = prompt('预计归还日期（YYYY-MM-DD）：', today);
+    updateResourceStatus(id,'已借出',name,today,ret);
+    loadResources();
+    toast('✅ 已借出');
+}
+function returnRes(id) { updateResourceStatus(id,'可用',null,null,null); loadResources(); toast('✅ 已归还'); }
+function delResource(id) { if (!confirm('确认删除？')) return; delOne('resources',id); loadResources(); refreshStats(); toast('已删除'); }
+
+// ==================== 剧本版权 ====================
+document.getElementById('scriptForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    addOne('scripts', {
+        title: document.getElementById('scriptTitle').value,
+        author: document.getElementById('scriptAuthor').value,
+        copyright_status: document.getElementById('scriptCopyrightStatus').value,
+        contact_info: document.getElementById('scriptContact').value,
+        license_type: document.getElementById('scriptLicense').value,
+        expiration_date: document.getElementById('scriptExpiration').value,
+        notes: document.getElementById('scriptNotes').value
+    });
+    this.reset();
+    loadScripts();
+    refreshStats();
+    toast('✅ 剧本已保存');
+});
+
+var STATUS_MAP = { '未获取':'st-pending','申请中':'st-pending','已授权':'st-auth','已过期':'st-borrowed' };
+function loadScripts() {
+    var list = getAll('scripts');
+    var div = document.getElementById('scriptList');
+    if (!list.length) { div.innerHTML = '<p style="color:#999">-- 暂无剧本 --</p>'; return; }
+    div.innerHTML = list.map(function(s) {
+        return '<div class="list-item"><div class="item-info"><h4>📖 ' + esc(s.title) + '</h4><p>✍ 作者：' + (s.author||'未知') + '</p><p>版权：<span class="status-badge ' + (STATUS_MAP[s.copyright_status]||'st-pending') + '">' + s.copyright_status + '</span></p>' + (s.contact_info ? '<p>📞 '+esc(s.contact_info)+'</p>' : '') + (s.license_type ? '<p>📄 授权类型：'+esc(s.license_type)+'</p>' : '') + (s.expiration_date ? '<p>⏰ 到期：'+s.expiration_date+'</p>' : '') + (s.notes ? '<p>📝 '+esc(s.notes)+'</p>' : '') + '</div><div class="item-actions"><select onchange="updScriptSt('+s.id+',this.value)" style="padding:5px 8px;border-radius:6px;border:1px solid #ddd;font-size:12px"><option value="">更新状态</option><option value="未获取">未获取</option><option value="申请中">申请中</option><option value="已授权">已授权</option><option value="已过期">已过期</option></select><button class="btn btn-danger" onclick="delScript('+s.id+')">删除</button></div></div>';
+    }).join('');
+}
+function updScriptSt(id, st) { if (!st) return; updateScriptStatus(id,st); loadScripts(); toast('✅ 状态已更新'); }
+function delScript(id) { if (!confirm('确认删除？')) return; delOne('scripts',id); loadScripts(); refreshStats(); toast('已删除'); }
+
+// ==================== 初始化 ====================
+window.addEventListener('DOMContentLoaded', function() {
+    // 首次访问时预置演示数据
+    var db = loadDB();
+    var fresh = !db.members.length && !db.rehearsals.length;
+    if (fresh) {
+        db.members = [
+            {id:1,name:'王冠宇',grade:'大三',role:'团长/男主角',skills:'表演,导演',schedule:'周一78节有课，周三56节有课',attendance_rate:95,created_at:'2026-06-01'},
+            {id:2,name:'张明',grade:'大二',role:'女主角',skills:'表演,歌唱',schedule:'周二56节有课，周四78节有课',attendance_rate:88,created_at:'2026-06-01'},
+            {id:3,name:'李娜',grade:'大一',role:'配角A',skills:'舞蹈,表演',schedule:'周一12节有课，周三12节有课',attendance_rate:90,created_at:'2026-06-01'},
+            {id:4,name:'赵磊',grade:'大三',role:'配角B',skills:'武术,道具制作',schedule:'周二78节有课，周五56节有课',attendance_rate:82,created_at:'2026-06-01'},
+            {id:5,name:'陈欣',grade:'大二',role:'编剧',skills:'写作,策划',schedule:'周四12节有课',attendance_rate:96,created_at:'2026-06-01'}
+        ];
+        db.rehearsals = [
+            {id:1,title:'《星喜》首次联排',date:'2026-06-20',time:'19:00',participants:'王冠宇,张明,李娜,赵磊',location:'活动中心301',notes:'请携带完整剧本',created_at:'2026-06-10'},
+            {id:2,title:'台词打磨训练',date:'2026-06-18',time:'16:00',participants:'王冠宇,张明',location:'排练厅B',notes:'重点练习第二幕',created_at:'2026-06-09'}
+        ];
+        db.resources = [
+            {id:1,name:'聚光灯A01',type:'道具',status:'可用',borrower:null,borrow_date:null,return_date:null,notes:'仓库A区',created_at:'2026-06-01'},
+            {id:2,name:'女主角礼服',type:'服装',status:'已借出',borrower:'张明',borrow_date:'2026-06-15',return_date:'2026-06-25',notes:'需干洗',created_at:'2026-06-01'},
+            {id:3,name:'活动中心301',type:'场地',status:'可用',borrower:null,borrow_date:null,return_date:null,notes:'容纳50人，配有音响',created_at:'2026-06-01'}
+        ];
+        db.scripts = [
+            {id:1,title:'《星喜》',author:'陈思',copyright_status:'已授权',contact_info:'星空出版社 010-12345678',license_type:'演出授权（1年）',expiration_date:'2027-03-01',notes:'已签署授权协议',created_at:'2026-06-01'},
+            {id:2,title:'《青春纪事》',author:'林白',copyright_status:'申请中',contact_info:'l_bai@example.com',license_type:'',expiration_date:'',notes:'等待版权方回复',created_at:'2026-06-05'}
+        ];
+        db.nextId = 6;
+        saveDB(db);
+    }
+
+    loadRehearsals();
+    loadMembers();
+    document.getElementById('memberCount').textContent = getAll('members').length;
+    loadResources();
+    loadScripts();
+    refreshStats();
+});
+</script>
+
+</body>
+</html>
