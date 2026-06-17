@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>话剧社团管理平台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei',Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+.container{max-width:1200px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:30px;text-align:center}
+header h1{font-size:1.8em;margin-bottom:20px;text-shadow:2px 2px 4px rgba(0,0,0,.2)}
+nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.tab-btn{padding:10px 18px;border:2px solid #fff;background:transparent;color:#fff;border-radius:25px;cursor:pointer;font-size:15px;transition:all .3s;font-weight:bold}
+.tab-btn:hover{background:rgba(255,255,255,.2)}
+.tab-btn.active{background:#fff;color:#667eea}
+main{padding:20px;min-height:500px}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeIn .5s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#f8f9fa;border-radius:15px;padding:20px;margin-bottom:20px;box-shadow:0 5px 15px rgba(0,0,0,.1);border-left:5px solid #667eea}
+.card h3{color:#667eea;margin-bottom:15px;font-size:1.3em}
+form{display:flex;flex-direction:column;gap:12px}
+input,select,textarea{padding:10px 12px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;transition:border .3s;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#667eea}
+textarea{resize:vertical;min-height:70px}
+.btn{padding:10px 24px;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;transition:all .3s}
+.btn-primary{background:#667eea;color:#fff}
+.btn-primary:hover{background:#5568d3;transform:translateY(-2px);box-shadow:0 5px 15px rgba(102,126,234,.4)}
+.btn-success{background:#28a745;color:#fff}
+.btn-success:hover{background:#218838;transform:translateY(-2px);box-shadow:0 5px 15px rgba(40,167,69,.4)}
+.btn-danger{background:#dc3545;color:#fff;padding:6px 12px;font-size:13px}
+.btn-danger:hover{background:#c82333}
+.template-info{background:#fff3cd;border-left:4px solid #ffc107;padding:12px;border-radius:8px;margin-bottom:15px}
+.template-info p{margin:4px 0;color:#856404;font-size:14px}
+.result-box{background:#fff;border-radius:10px;padding:15px;margin-top:15px;border:2px solid #667eea}
+.result-box h4{color:#667eea;margin-bottom:10px}
+.result-item{background:#e7f3ff;padding:12px;border-radius:8px;margin:8px 0;border-left:4px solid #2196F3}
+.list{display:grid;gap:12px}
+.list-item{background:#fff;padding:15px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;transition:all .3s}
+.list-item:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(0,0,0,.15)}
+.item-info{flex:1;min-width:180px}
+.item-info h4{color:#667eea;margin-bottom:6px}
+.item-info p{color:#666;line-height:1.5;font-size:14px}
+.item-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.status-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:bold}
+.status-available{background:#d4edda;color:#155724}
+.status-borrowed{background:#f8d7da;color:#721c24}
+.status-pending{background:#fff3cd;color:#856404}
+.status-authorized{background:#d1ecf1;color:#0c5460}
+footer{background:#f8f9fa;padding:15px;text-align:center;color:#666;border-top:1px solid #e0e0e0;font-size:14px}
+
+/* 移动端适配 */
+@media(max-width:768px){
+body{padding:8px}
+header h1{font-size:1.5em}
+nav{flex-direction:column}
+.tab-btn{width:100%}
+main{padding:12px}
+.card{padding:15px}
+.list-item{flex-direction:column;align-items:flex-start}
+.item-actions{width:100%;justify-content:flex-end}
+}
+@media(max-width:480px){
+header h1{font-size:1.3em}
+.card h3{font-size:1.1em}
+.btn{padding:8px 16px;font-size:14px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>🎭 话剧社团管理平台</h1>
+<nav>
+<button class="tab-btn active" data-tab="schedule">智能排期</button>
+<button class="tab-btn" data-tab="members">成员管理</button>
+<button class="tab-btn" data-tab="resources">资源管理</button>
+<button class="tab-btn" data-tab="scripts">剧本版权</button>
+</nav>
+</header>
+<main>
+<!-- 智能排期模块 -->
+<section id="schedule" class="tab-content active">
+<h2 style="margin-bottom:15px;color:#333">📅 智能排期系统</h2>
+<div class="card">
+<h3>最优排练时间推荐</h3>
+<p style="margin-bottom:12px;color:#666;font-size:14px">系统将根据所有成员的课程表自动分析时间冲突，推荐参与人数最多的排练时段。</p>
+<button id="findOptimalTime" class="btn btn-primary">🔍 检测最优时间</button>
+<div id="optimalTimeResult" class="result-box" style="display:none"></div>
+</div>
+<div class="card">
+<h3>添加排练安排</h3>
+<form id="rehearsalForm">
+<input type="text" id="rehearsalTitle" placeholder="排练标题（如：星喜联排第一场）" required>
+<input type="date" id="rehearsalDate" required>
+<input type="time" id="rehearsalTime" required>
+<input type="text" id="rehearsalParticipants" placeholder="参与人员（逗号分隔）">
+<input type="text" id="rehearsalLocation" placeholder="地点（如：活动中心301）">
+<textarea id="rehearsalNotes" placeholder="备注（如：请携带剧本）"></textarea>
+<button type="submit" class="btn btn-success">添加排练</button>
+</form>
+</div>
+<div class="card">
+<h3>排练安排列表</h3>
+<div id="rehearsalList" class="list"><p style="color:#999">暂无排练安排</p></div>
+</div>
+</section>
+<!-- 成员管理模块 -->
+<section id="members" class="tab-content">
+<h2 style="margin-bottom:15px;color:#333">👥 成员管理</h2>
+<div class="card">
+<h3>添加成员</h3>
+<div class="template-info">
+<strong>📝 数据录入格式：</strong>
+<p><code>姓名，年级，饰演角色，上课时间</code></p>
+<p><em>示例：张三，大二，主角，周一78节有课，周二56节有课</em></p>
+</div>
+<form id="memberForm">
+<input type="text" id="memberName" placeholder="姓名（如：张三）" required>
+<select id="memberGrade" required>
+<option value="">选择年级</option>
+<option value="大一">大一</option>
+<option value="大二">大二</option>
+<option value="大三">大三</option>
+<option value="大四">大四</option>
+</select>
+<input type="text" id="memberRole" placeholder="饰演角色（如：主角、配角）">
+<input type="text" id="memberSkills" placeholder="技能标签（逗号分隔，如：表演,唱歌,舞蹈）">
+<textarea id="memberSchedule" placeholder="上课时间（例：周一78节有课，周二56节有课）" rows="3"></textarea>
+<button type="submit" class="btn btn-success">添加成员</button>
+</form>
+</div>
+<div class="card">
+<h3>成员列表（<span id="memberCount">0</span>人）</h3>
+<div id="memberList" class="list"><p style="color:#999">暂无成员，请添加</p></div>
+</div>
+<div class="card">
+<h3>📢 一键发布通知</h3>
+<textarea id="notificationMessage" placeholder="输入排练通知内容..."></textarea>
+<button id="sendNotification" class="btn btn-primary" style="margin-top:10px">发送通知给全体成员</button>
+</div>
+</section>
+<!-- 资源管理模块 -->
+<section id="resources" class="tab-content">
+<h2 style="margin-bottom:15px;color:#333">📦 资源库存管理</h2>
+<div class="card">
+<h3>添加资源</h3>
+<form id="resourceForm">
+<input type="text" id="resourceName" placeholder="资源名称（如：聚光灯01）" required>
+<select id="resourceType" required>
+<option value="">选择类型</option>
+<option value="道具">道具</option>
+<option value="服装">服装</option>
+<option value="场地">场地</option>
+</select>
+<textarea id="resourceNotes" placeholder="备注（如：存放在仓库A区）"></textarea>
+<button type="submit" class="btn btn-success">添加资源</button>
+</form>
+</div>
+<div class="card">
+<h3>资源列表</h3>
+<div id="resourceList" class="list"><p style="color:#999">暂无资源，请添加</p></div>
+</div>
+</section>
+<!-- 剧本版权模块 -->
+<section id="scripts" class="tab-content">
+<h2 style="margin-bottom:15px;color:#333">📜 剧本版权库</h2>
+<div class="card">
+<h3>添加剧本</h3>
+<form id="scriptForm">
+<input type="text" id="scriptTitle" placeholder="剧本名称" required>
+<input type="text" id="scriptAuthor" placeholder="作者">
+<select id="scriptCopyrightStatus">
+<option value="未获取">未获取</option>
+<option value="申请中">申请中</option>
+<option value="已授权">已授权</option>
+<option value="已过期">已过期</option>
+</select>
+<input type="text" id="scriptContact" placeholder="版权联系人信息">
+<input type="text" id="scriptLicense" placeholder="授权类型">
+<input type="date" id="scriptExpiration">
+<textarea id="scriptNotes" placeholder="备注"></textarea>
+<button type="submit" class="btn btn-success">添加剧本</button>
+</form>
+</div>
+<div class="card">
+<h3>剧本列表</h3>
+<div id="scriptList" class="list"><p style="color:#999">暂无剧本，请添加</p></div>
+</div>
+</section>
+</main>
+<footer>
+<p>© 2026 大学话剧社团管理平台 | 数据存储在本地浏览器 | 支持移动端访问</p>
+</footer>
+</div>
+
+<script>
+// ==================== 数据存储（localStorage） ====================
+const DB_KEY = 'drama_club_data';
+
+function loadDB() {
+    const raw = localStorage.getItem(DB_KEY);
+    return raw ? JSON.parse(raw) : { members: [], rehearsals: [], resources: [], scripts: [], nextId: 1 };
+}
+
+function saveDB(db) {
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+}
+
+function nextId(db) {
+    return db.nextId++;
+}
+
+// 获取数据
+function getMembers() { const db = loadDB(); return db.members; }
+function getRehearsals() { const db = loadDB(); return db.rehearsals; }
+function getResources() { const db = loadDB(); return db.resources; }
+function getScripts() { const db = loadDB(); return db.scripts; }
+
+// 添加数据
+function addMember(member) {
+    const db = loadDB();
+    member.id = nextId(db);
+    member.attendance_rate = 0;
+    member.created_at = new Date().toISOString();
+    db.members.push(member);
+    saveDB(db);
+    return member;
+}
+
+function addRehearsal(rehearsal) {
+    const db = loadDB();
+    rehearsal.id = nextId(db);
+    rehearsal.created_at = new Date().toISOString();
+    db.rehearsals.push(rehearsal);
+    saveDB(db);
+    return rehearsal;
+}
+
+function addResource(resource) {
+    const db = loadDB();
+    resource.id = nextId(db);
+    resource.status = '可用';
+    resource.borrower = null;
+    resource.borrow_date = null;
+    resource.return_date = null;
+    resource.created_at = new Date().toISOString();
+    db.resources.push(resource);
+    saveDB(db);
+    return resource;
+}
+
+function addScript(script) {
+    const db = loadDB();
+    script.id = nextId(db);
+    script.created_at = new Date().toISOString();
+    db.scripts.push(script);
+    saveDB(db);
+    return script;
+}
+
+// 删除数据
+function deleteMember(id) {
+    const db = loadDB();
+    db.members = db.members.filter(m => m.id !== id);
+    saveDB(db);
+}
+
+function deleteRehearsal(id) {
+    const db = loadDB();
+    db.rehearsals = db.rehearsals.filter(r => r.id !== id);
+    saveDB(db);
+}
+
+function deleteResource(id) {
+    const db = loadDB();
+    db.resources = db.resources.filter(r => r.id !== id);
+    saveDB(db);
+}
+
+function deleteScript(id) {
+    const db = loadDB();
+    db.scripts = db.scripts.filter(s => s.id !== id);
+    saveDB(db);
+}
+
+// 更新资源状态
+function updateResourceStatus(id, status, borrower, borrow_date, return_date) {
+    const db = loadDB();
+    const res = db.resources.find(r => r.id === id);
+    if (res) {
+        res.status = status;
+        res.borrower = borrower || null;
+        res.borrow_date = borrow_date || null;
+        res.return_date = return_date || null;
+        saveDB(db);
+    }
+}
+
+// 更新剧本版权状态
+function updateScriptStatus(id, status) {
+    const db = loadDB();
+    const script = db.scripts.find(s => s.id === id);
+    if (script) {
+        script.copyright_status = status;
+        saveDB(db);
+    }
+}
+
+// ==================== 智能排期算法 ====================
+function findOptimalTime() {
+    const members = getMembers();
+    const timeSlots = {}; // 存储每个时间段的可用人数
+
+    // 初始化每天时间段
+    const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    const slots = ['12', '34', '56', '78', '910'];
+    
+    days.forEach(day => {
+        timeSlots[day] = {};
+        slots.forEach(slot => {
+            timeSlots[day][slot] = 0;
+        });
+    });
+
+    // 有课程信息的成员数
+    let membersWithSchedule = 0;
+
+    members.forEach(member => {
+        if (member.schedule && member.schedule.trim()) {
+            membersWithSchedule++;
+            const schedule = member.schedule;
+            
+            days.forEach(day => {
+                // 检查这一天是否有课
+                const pattern = new RegExp(day + '(\\d+)节有课');
+                const match = schedule.match(pattern);
+                
+                if (match) {
+                    // 有课程：标记哪些节次被占用
+                    const busySlots = match[1]; // 例如 "78"
+                    slots.forEach(slot => {
+                        // 如果该slot的时间数字不在busySlots中，则表示该时段可用
+                        if (!busySlots.includes(slot)) {
+                            timeSlots[day][slot]++;
+                        }
+                    });
+                } else {
+                    // 没有提到这一天=该天全天可用
+                    slots.forEach(slot => {
+                        timeSlots[day][slot]++;
+                    });
+                }
+            });
+        } else {
+            // 没有填写课程：默认所有时间都可用
+            days.forEach(day => {
+                slots.forEach(slot => {
+                    timeSlots[day][slot]++;
+                });
+            });
+        }
+    });
+
+    // 整理所有可用时间段
+    const availableSlots = [];
+    days.forEach(day => {
+        slots.forEach(slot => {
+            availableSlots.push({
+                day: day,
+                time: slot,
+                count: timeSlots[day][slot],
+                total: members.length
+            });
+        });
+    });
+
+    // 按可用人数降序排列
+    availableSlots.sort((a, b) => b.count - a.count);
+
+    return {
+        slots: availableSlots.slice(0, 5),
+        memberCount: members.length,
+        membersWithSchedule: membersWithSchedule
+    };
+}
+
+// ==================== 标签页切换 ====================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+        if (tabId === 'members') { loadMembers(); updateMemberCount(); }
+        if (tabId === 'resources') loadResources();
+        if (tabId === 'scripts') loadScripts();
+        if (tabId === 'schedule') loadRehearsals();
+    });
+});
+
+// ==================== 智能排期模块 ====================
+document.getElementById('findOptimalTime').addEventListener('click', () => {
+    const result = findOptimalTime();
+    const resultDiv = document.getElementById('optimalTimeResult');
+    resultDiv.style.display = 'block';
+    
+    if (result.memberCount === 0) {
+        resultDiv.innerHTML = '<p style="color:#856404">⚠️ 请先在"成员管理"中添加成员并填写课程安排</p>';
+        return;
+    }
+
+    // 时间段名称映射
+    const slotNames = {
+        '12': '第1-2节 (8:00-9:35)',
+        '34': '第3-4节 (10:00-11:35)',
+        '56': '第5-6节 (14:00-15:35)',
+        '78': '第7-8节 (16:00-17:35)',
+        '910': '第9-10节 (19:00-20:35)'
+    };
+
+    let html = `<h4>📊 最优排练时间推荐（共${result.memberCount}名成员）</h4>`;
+    html += `<p style="color:#666;margin-bottom:10px;font-size:14px">已填写课程：${result.membersWithSchedule}人 | 参与率 = 可用人数/总人数</p>`;
+    
+    result.slots.forEach((slot, index) => {
+        const percentage = slot.total > 0 ? Math.round(slot.count / slot.total * 100) : 0;
+        const color = percentage >= 80 ? '#28a745' : percentage >= 50 ? '#ffc107' : '#dc3545';
+        html += `
+            <div class="result-item">
+                <strong>🏆 第${index + 1}推荐：</strong>${slot.day} ${slotNames[slot.time] || ('第' + slot.time + '节')}
+                <br><span style="color:${color};font-weight:bold">可用人数：${slot.count}人 (${percentage}%)</span>
+            </div>
+        `;
+    });
+    
+    if (result.membersWithSchedule === 0) {
+        html += '<p style="color:#856404;margin-top:10px">💡 提示：尚无成员填写课程安排，默认所有时间可用。请在成员管理中为成员添加课程信息以获取更准确的推荐。</p>';
+    }
+    
+    resultDiv.innerHTML = html;
+});
+
+document.getElementById('rehearsalForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const rehearsal = {
+        title: document.getElementById('rehearsalTitle').value,
+        date: document.getElementById('rehearsalDate').value,
+        time: document.getElementById('rehearsalTime').value,
+        participants: document.getElementById('rehearsalParticipants').value,
+        location: document.getElementById('rehearsalLocation').value,
+        notes: document.getElementById('rehearsalNotes').value
+    };
+    addRehearsal(rehearsal);
+    e.target.reset();
+    loadRehearsals();
+    showToast('排练安排添加成功！');
+});
+
+function loadRehearsals() {
+    const rehearsals = getRehearsals();
+    rehearsals.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.time.localeCompare(b.time);
+    });
+    const listDiv = document.getElementById('rehearsalList');
+    if (rehearsals.length > 0) {
+        listDiv.innerHTML = rehearsals.map(r => `
+            <div class="list-item">
+                <div class="item-info">
+                    <h4>🎬 ${r.title}</h4>
+                    <p><strong>日期：</strong>${r.date} ${r.time}</p>
+                    <p><strong>地点：</strong>${r.location || '未指定'}</p>
+                    <p><strong>参与人员：</strong>${r.participants || '全员'}</p>
+                    ${r.notes ? '<p><strong>备注：</strong>'+r.notes+'</p>' : ''}
+                </div>
+                <div class="item-actions">
+                    <button class="btn btn-danger" onclick="delRehearsal(${r.id})">删除</button>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        listDiv.innerHTML = '<p style="color:#999">暂无排练安排</p>';
+    }
+}
+
+function delRehearsal(id) {
+    if (!confirm('确定要删除这个排练安排吗？')) return;
+    deleteRehearsal(id);
+    loadRehearsals();
+    showToast('排练安排已删除');
+}
+
+// ==================== 成员管理模块 ====================
+document.getElementById('memberForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const member = {
+        name: document.getElementById('memberName').value,
+        grade: document.getElementById('memberGrade').value,
+        role: document.getElementById('memberRole').value,
+        skills: document.getElementById('memberSkills').value,
+        schedule: document.getElementById('memberSchedule').value
+    };
+    addMember(member);
+    e.target.reset();
+    loadMembers();
+    updateMemberCount();
+    showToast('成员添加成功！');
+});
+
+function loadMembers() {
+    const members = getMembers();
+    const listDiv = document.getElementById('memberList');
+    if (members.length > 0) {
+        listDiv.innerHTML = members.map(m => {
+            const formatSchedule = (s) => {
+                if (!s) return '<span style="color:#999">未填写</span>';
+                return s;
+            };
+            return `
+            <div class="list-item">
+                <div class="item-info">
+                    <h4>👤 ${m.name} <small style="color:#999">(${m.grade})</small></h4>
+                    <p><strong>角色：</strong>${m.role || '未分配'}</p>
+                    <p><strong>技能标签：</strong>${m.skills || '无'}</p>
+                    <p><strong>课程安排：</strong>${formatSchedule(m.schedule)}</p>
+                    <p><strong>出勤率：</strong>${m.attendance_rate || 0}%</p>
+                </div>
+                <div class="item-actions">
+                    <button class="btn btn-danger" onclick="delMember(${m.id})">删除</button>
+                </div>
+            </div>
+        `}).join('');
+    } else {
+        listDiv.innerHTML = '<p style="color:#999">暂无成员，请按照模板格式添加成员</p>';
+    }
+}
+
+function updateMemberCount() {
+    document.getElementById('memberCount').textContent = getMembers().length;
+}
+
+function delMember(id) {
+    if (!confirm('确定要删除这个成员吗？')) return;
+    deleteMember(id);
+    loadMembers();
+    updateMemberCount();
+    showToast('成员已删除');
+}
+
+document.getElementById('sendNotification').addEventListener('click', () => {
+    const message = document.getElementById('notificationMessage').value.trim();
+    if (!message) { showToast('请输入通知内容！'); return; }
+    document.getElementById('notificationMessage').value = '';
+    showToast('📢 通知已发布！\n内容：' + message);
+});
+
+// ==================== 资源管理模块 ====================
+document.getElementById('resourceForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const resource = {
+        name: document.getElementById('resourceName').value,
+        type: document.getElementById('resourceType').value,
+        notes: document.getElementById('resourceNotes').value
+    };
+    addResource(resource);
+    e.target.reset();
+    loadResources();
+    showToast('资源添加成功！');
+});
+
+function loadResources() {
+    const resources = getResources();
+    const listDiv = document.getElementById('resourceList');
+    if (resources.length > 0) {
+        listDiv.innerHTML = resources.map(r => `
+            <div class="list-item">
+                <div class="item-info">
+                    <h4>📋 ${r.name} <small style="color:#999">(${r.type})</small></h4>
+                    <p><strong>状态：</strong><span class="status-badge ${r.status === '可用' ? 'status-available' : 'status-borrowed'}">${r.status}</span></p>
+                    ${r.borrower ? '<p><strong>借用人：</strong>'+r.borrower+'</p>' : ''}
+                    ${r.borrow_date ? '<p><strong>借出日期：</strong>'+r.borrow_date+'</p>' : ''}
+                    ${r.return_date ? '<p><strong>预计归还：</strong>'+r.return_date+'</p>' : ''}
+                    ${r.notes ? '<p><strong>备注：</strong>'+r.notes+'</p>' : ''}
+                </div>
+                <div class="item-actions">
+                    ${r.status === '可用'
+                        ? '<button class="btn btn-primary" onclick="borrowR('+r.id+')">借出</button>'
+                        : '<button class="btn btn-success" onclick="returnR('+r.id+')">归还</button>'}
+                    <button class="btn btn-danger" onclick="delResource('+r.id+')">删除</button>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        listDiv.innerHTML = '<p style="color:#999">暂无资源，请添加道具、服装或场地</p>';
+    }
+}
+
+function borrowR(id) {
+    const borrower = prompt('请输入借用人姓名：');
+    if (!borrower) return;
+    const today = new Date().toISOString().split('T')[0];
+    const returnDate = prompt('请输入预计归还日期（格式：YYYY-MM-DD）：', today);
+    updateResourceStatus(id, '已借出', borrower, today, returnDate);
+    loadResources();
+    showToast('资源已借出！');
+}
+
+function returnR(id) {
+    updateResourceStatus(id, '可用', null, null, null);
+    loadResources();
+    showToast('资源已归还！');
+}
+
+function delResource(id) {
+    if (!confirm('确定要删除这个资源吗？')) return;
+    deleteResource(id);
+    loadResources();
+    showToast('资源已删除');
+}
+
+// ==================== 剧本版权模块 ====================
+document.getElementById('scriptForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const script = {
+        title: document.getElementById('scriptTitle').value,
+        author: document.getElementById('scriptAuthor').value,
+        copyright_status: document.getElementById('scriptCopyrightStatus').value,
+        contact_info: document.getElementById('scriptContact').value,
+        license_type: document.getElementById('scriptLicense').value,
+        expiration_date: document.getElementById('scriptExpiration').value,
+        notes: document.getElementById('scriptNotes').value
+    };
+    addScript(script);
+    e.target.reset();
+    loadScripts();
+    showToast('剧本添加成功！');
+});
+
+function loadScripts() {
+    const scripts = getScripts();
+    const listDiv = document.getElementById('scriptList');
+    if (scripts.length > 0) {
+        listDiv.innerHTML = scripts.map(s => {
+            const statusClassMap = {
+                '未获取': 'status-pending',
+                '申请中': 'status-pending',
+                '已授权': 'status-authorized',
+                '已过期': 'status-borrowed'
+            };
+            return `
+            <div class="list-item">
+                <div class="item-info">
+                    <h4>📖 ${s.title}</h4>
+                    <p><strong>作者：</strong>${s.author || '未知'}</p>
+                    <p><strong>版权状态：</strong><span class="status-badge ${statusClassMap[s.copyright_status] || 'status-pending'}">${s.copyright_status}</span></p>
+                    ${s.contact_info ? '<p><strong>联系人：</strong>'+s.contact_info+'</p>' : ''}
+                    ${s.license_type ? '<p><strong>授权类型：</strong>'+s.license_type+'</p>' : ''}
+                    ${s.expiration_date ? '<p><strong>到期日：</strong>'+s.expiration_date+'</p>' : ''}
+                    ${s.notes ? '<p><strong>备注：</strong>'+s.notes+'</p>' : ''}
+                </div>
+                <div class="item-actions">
+                    <select onchange="updScriptStatus(${s.id}, this.value)" style="padding:6px 8px;border-radius:6px;border:1px solid #ddd;font-size:13px">
+                        <option value="">更新状态</option>
+                        <option value="未获取">未获取</option>
+                        <option value="申请中">申请中</option>
+                        <option value="已授权">已授权</option>
+                        <option value="已过期">已过期</option>
+                    </select>
+                    <button class="btn btn-danger" onclick="delScript(${s.id})">删除</button>
+                </div>
+            </div>
+        `}).join('');
+    } else {
+        listDiv.innerHTML = '<p style="color:#999">暂无剧本，请添加剧本版权信息</p>';
+    }
+}
+
+function updScriptStatus(id, status) {
+    if (!status) return;
+    updateScriptStatus(id, status);
+    loadScripts();
+    showToast('版权状态已更新！');
+}
+
+function delScript(id) {
+    if (!confirm('确定要删除这个剧本吗？')) return;
+    deleteScript(id);
+    loadScripts();
+    showToast('剧本已删除');
+}
+
+// ==================== Toast 提示 ====================
+function showToast(message) {
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#333;color:#fff;padding:12px 24px;border-radius:10px;font-size:15px;z-index:9999;opacity:0;transition:opacity 0.3s;max-width:300px;word-wrap:break-word';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+}
+
+// ==================== 页面初始化 ====================
+window.addEventListener('load', () => {
+    loadRehearsals();
+    loadMembers();
+    updateMemberCount();
+    loadResources();
+    loadScripts();
+});
+</script>
+</body>
+</html>
